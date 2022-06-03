@@ -47,8 +47,7 @@ salarios$ObsNumber <- 1:5634
 
 # Distribuição de frequência
 
-
-# install.packages("fdth")
+install.packages("fdth")
 
 library (fdth)
 
@@ -59,8 +58,11 @@ print (table)
 
 # Histograma
 
-# install.packages("RcmdrMisc")
+install.packages("RcmdrMisc")
 library (RcmdrMisc)
+
+table <- fdt (salarios$age)
+
 
 X11(width = 10, height = 12)
 with(salarios, Hist(age, scale="frequency", breaks="sturges", 
@@ -72,17 +74,17 @@ with(salarios, Hist(age, scale="frequency", breaks="sturges",
 # Boxplot
 
 ## Importar os Dados
-ceo <- read.table("C:/iaa/estat_I/ceo.txt", header = TRUE, sep = "", 
+ceo <- read.table("C:/Users/escneto/Documents/Estudos/Pos_IA_UFPR/Estatistica_Aplicada/ceo.txt", header = TRUE, sep = "", 
                   na.strings = "NA", dec = ".", strip.white = TRUE)
 
-save ("ceo", file = "C:/iaa/estat_I/ceo.RData")
-load("C:/iaa/estat_I/ceo.RData")
+save ("ceo", file = "C:/Users/escneto/Documents/Estudos/Pos_IA_UFPR/Estatistica_Aplicada/ceo.RData")
+load("C:/Users/escneto/Documents/Estudos/Pos_IA_UFPR/Estatistica_Aplicada/ceo.RData")
 
 View (ceo)
 
 names (ceo)
 
-# install.packages("car")
+ install.packages("car")
 
 require (car)
 
@@ -101,14 +103,17 @@ plot(comten, age, main="Tempo de Empresa X Idade do Funcionário",
 # Importanto arquivo de dados temporais
 
 # install.packages("readxl")
-# install.packages(plotly)
-# install.packages(tidyverse)
+# install.packages("plotly")
+# install.packages("tidyverse")
 
 library(readxl)
 library(plotly)
 library(tidyverse)
 
-basepetr4 <- read_excel("C:/iaa/estat_I/basepetr4.xlsx")
+basepetr4 <- read_excel("C:/Users/escneto/Documents/Estudos/Pos_IA_UFPR/Estatistica_Aplicada/basepetr4.xlsx")
+
+#  %>% -> Pipe
+# https://livro.curso-r.com/6-1-o-operador-pipe.html
 
 ggplotly(
   basepetr4 %>%
@@ -562,7 +567,7 @@ z.test(x, y = NULL, alternative = "two.sided", mu = 0, sigma.x = sd,
 # 95% de confiança ou 5% de significância (usamos isso para obter o
 # valor tabelado, conforme comando abaixo)
 
-qnorm(0,95)
+qnorm(0.95)
 
 # Como a estistica z calculada (83.646) é maior que a estatística tabelada
 # (1.96) rejeitamos a hipótese (H0) de que o valor verdadeiro da média
