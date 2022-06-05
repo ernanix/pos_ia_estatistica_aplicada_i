@@ -1,0 +1,158 @@
+---
+title: "Primeira lista de exercícios"
+author: "Ernani de Souza Cubas Neto"
+date: '05/06/2022'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+#### **Com a base de dados “realestateiaa” obter os seguintes resultados com o auxílio do “R”**
+
+#### Carregando as bibliotecas
+```{r, echo=FALSE}
+load("D:/Cursos/Pos_IA/Estatistica_aplicada_I/exercicio1/realestateiaa.RData")
+library (RcmdrMisc)
+library (fdth)
+library(BSDA)
+library(nortest)
+```
+
+---
+
+#### **a) Elaborar o histograma e o boxplot das variáveis “parea e tarea”. **
+
+#### Histograma da variável "parea"
+
+```{r, echo=FALSE}
+with(realestateiaa, Hist(parea, scale="frequency", breaks="sturges", 
+                    col="darkgray"))
+```
+
+#### Histograma da variável "tarea"
+
+```{r, echo=FALSE}
+with(realestateiaa, Hist(tarea, scale="frequency", breaks="sturges", 
+                    col="darkgray"))
+```
+
+#### Bloxpot da variável "parea"
+
+```{r, echo=FALSE}
+Boxplot( ~ parea, data=realestateiaa, id=list(method="y"))
+```
+
+#### Bloxpot da variável "tarea"
+
+```{r, echo=FALSE}
+Boxplot( ~ tarea, data=realestateiaa, id=list(method="y"))
+```
+
+---
+
+#### **b) Elaborar a tabela de distribuição de frequências da variável “price” (preço dos imóveis)** 
+
+#### Tabela de distribuição de frequências: 
+```{r, echo=FALSE}
+print(fdt (realestateiaa$price))
+```
+
+**_Sobre a resposta:_**  rf - Frequência Relativa, cf - Frequência Acumulada
+
+---
+
+#### **c) Para a variável “price” calcular os seguintes indicadores: média; mediana; moda; variância; desvio padrão; CV–Coeficiente de Variação; Quartis; distância interquartílica; percentis.**
+
+
+```{r, echo=FALSE}
+options(scipen = 999)
+
+media = round(mean(realestateiaa$price), 2)
+mediana = round(median(realestateiaa$price), 2)
+moda = subset(table(realestateiaa$price),table(realestateiaa$price) == max(table(realestateiaa$price)))
+modaVal = names(moda)
+var = round(var(realestateiaa$price),2)
+dp = round(sd (realestateiaa$price),2)
+cv = round((sd(realestateiaa$price) / mean(realestateiaa$price)) * 100,2)
+q1 = quantile(realestateiaa$price, probs = 0.25)
+q2 = quantile(realestateiaa$price, probs = 0.50)
+q3 = quantile(realestateiaa$price, probs = 0.75)
+di = round(IQR(realestateiaa$price),2)
+quant = quantile(realestateiaa$price, c(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9))
+```
+
+**Indicador**          | **Valor** 
+-----------------------|------------------------------------------ 
+Média                  | `r media`        
+Mediana                | `r mediana`   
+Moda                   | `r paste(as.character(modaVal), "-" ,as.character(moda),"ocorrências")`  
+Variância              | `r var`   
+Desvio Padrão          | `r dp`   
+CV                     | `r cv`   
+Quartis                | `r paste("Q1-",q1,"Q2-",q2,"Q3-",q3)`   
+Dist. Interq.          | `r di`    
+Percentis (10%-30%)    | `r paste("10%-",quant[1],"20%-",quant[2],"30%-",quant[3])` 
+Percentis (40%-60%)    | `r paste("40%-",quant[4],"50%-",quant[5],"60%-",quant[6])` 
+Percentis (70%-80%)    | `r paste("70%-",quant[7],"80%-",quant[8],"90%-",quant[9])`
+
+---
+
+#### **d) Estimar o intervalo de confiança para a média da variável “price” com 95% de confiança** 
+
+```{r, echo=FALSE}
+z.test(realestateiaa$price, y = NULL, alternative = "two.sided", mu = 0, sigma.x = sd(realestateiaa$price),
+       sigma.y = NULL, conf.level = 0.95)
+
+````
+**_Sobre a resposta:_**  A média de valores em "price" varia entre $ 1088778 e $ 1191468, com média de $ 1140123, com 95% de confiança ou 5% de significância. Estatística z = 43.522, ou seja, é maior que a estatística tabeleda, de 1.96, rejeitando-se a hipótese (H0) de que o valor verdadeiro da média é estatisticamente igual a zero.
+
+---
+
+#### **e) Fazer o teste de diferença entre médias para as variáveis “parea” e “tarea”.**
+
+```{r, echo=FALSE}
+z.test(realestateiaa$parea, realestateiaa$tarea, alternative = "two.sided", mu = 0, sigma.x = sd(realestateiaa$parea),
+       sigma.y = sd(realestateiaa$tarea), conf.level = 0.95)
+
+````
+**_Sobre a resposta:_** A diferença entre as médias estará entre -94.09729 e -71.20261, para as médias de 152.9867 e 235. 6366 (diferença de -82,6499), com 95% de confiança ou 5% de significância. Estatística z = -14.151, ou seja, é menor que a estatística tabeleda, de -1.96, rejeitando-se a hipótese (H0) de que a diferença verdadeira entre as médias não é igual a zero. Logo, pode-se dizer que as médias são estatísticamente diferentes.
+
+---
+
+#### **f) Fazer o teste de diferença entre variâncias para as variáveis “parea” e “tarea”.**
+
+```{r, echo=FALSE}
+var.test(realestateiaa$parea, realestateiaa$tarea, alternative = "two.sided", conf.level = 0.95)
+
+````
+**_Sobre a resposta:_**  A razão de variância é de 0.4385501 e a estatística F = 0.43855 com 976 graus de liberdade no numerador e denominador. Como o valor de F não está entre os valores tabelados 0.900007 e 1.111102 (encontrados pela função qf(0.95,976,976) e 1/qf(0.95,976,976)), as variâncias não são estatísticamente iguais.
+
+---
+
+#### **g) Fazer o Teste de Wilcoxon-Mann-Whitney para amostras independentes para as variáveis “parea” e “tarea”.**
+
+```{r, echo=FALSE}
+wilcox.test(realestateiaa$parea, realestateiaa$tarea, alternative = "two.sided") 
+
+````
+**_Sobre a resposta:_**  Como o resultado p-value é menor que 0.05, então as amostras são independentes.
+
+---
+
+#### **h) Fazer 2 testes de normalidade (a sua escolha) para a variável “price”.**
+
+#### Teste de normalidade de Kolmogorov-Smirnov
+```{r, echo=FALSE}
+normalityTest(~price, test="lillie.test", data=realestateiaa)
+
+````
+**_Sobre a resposta:_**  Valor calculado de D = 0.14486 e p-value menor que 0.05, significando que não existe normalidade da amostra
+
+#### Teste de normalidade de Anderson-Darling
+```{r, echo=FALSE}
+ad.test(realestateiaa$price)
+
+````
+**_Sobre a resposta:_**  Como p-value é menor que 0.05 rejeita-se a hipótese de normalidade da variável

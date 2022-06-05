@@ -4,8 +4,13 @@
 #Com a base de dados “realestateiaa” obter os seguintes resultados com o 
 #auxílio do “R”
 
-load("C:/Users/escneto/Documents/Estudos/Pos_IA_UFPR/Estatistica_Aplicada/exercicio1/realestateiaa.RData")
+
+#Local note: D:/Cursos/Pos_IA/Estatistica_aplicada_I/exercicio1
+#Local MP: C:/Users/escneto/Documents/Estudos/Pos_IA_UFPR/Estatistica_Aplicada/exercicio1 
+load("D:/Cursos/Pos_IA/Estatistica_aplicada_I/exercicio1/realestateiaa.RData")
 view (realestateiaa)
+
+pdf("D:/Cursos/Pos_IA/Estatistica_aplicada_I/exercicio1/ex1.pdf")
 
 #a) Elaborar o histograma e o boxplot das variáveis “parea e tarea”. 
 
@@ -35,8 +40,7 @@ library (fdth)
 
 table <- fdt (realestateiaa$price)
 
-print (table)
-
+table
 #c) Para a variável “price” calcular os seguintes indicadores: média; mediana; 
 #moda; variância; desvio padrão; CV–Coeficiente de Variação; Quartis; 
 #distância interquartílica; percentis. 
@@ -44,9 +48,8 @@ print (table)
 #Média
 mean(realestateiaa$price)
 #Mediana
-median (realestateiaa$price)
+median(realestateiaa$price)
 #Moda
-table(realestateiaa$price)
 subset(table(realestateiaa$price), 
        table(realestateiaa$price) == max(table(realestateiaa$price)))
 #Variância
@@ -72,7 +75,6 @@ library(BSDA)
 z.test(realestateiaa$price, y = NULL, alternative = "two.sided", mu = 0, sigma.x = sd(realestateiaa$price),
        sigma.y = NULL, conf.level = 0.95)
 
-
 #e) Fazer o teste de diferença entre médias para as variáveis “parea” e “tarea”. 
 
 z.test(realestateiaa$parea, realestateiaa$tarea, alternative = "two.sided", mu = 0, sigma.x = sd(realestateiaa$parea),
@@ -81,8 +83,21 @@ z.test(realestateiaa$parea, realestateiaa$tarea, alternative = "two.sided", mu =
 #f) Fazer o teste de diferença entre variâncias para as variáveis “parea” 
 #e “tarea”. 
 
+var.test(realestateiaa$parea, realestateiaa$tarea, alternative = "two.sided", conf.level = 0.95)
+
+
 #g) Fazer o Teste de Wilcoxon-Mann-Whitney para amostras independentes para as 
 #variáveis “parea” e “tarea”. 
 
+options(scipen = 999)
+
+wilcox.test(realestateiaa$parea, realestateiaa$tarea, alternative = "two.sided") 
 
 #h) Fazer 2 testes de normalidade (a sua escolha) para a variável “price”.
+#Teste de normalidade de Kolmogorov-Smirnov
+normalityTest(~price, test="lillie.test", data=realestateiaa)
+
+#Teste de normalidade de Anderson-Darling
+library(nortest)
+
+ad.test(realestateiaa$price)

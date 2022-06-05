@@ -888,7 +888,15 @@ outlm$tf.data # transformed data for y variable
 ##############################################################################
 # Carregando o arquivo de dados
 
-load("C:/iaa/estat_I/wage.RData")
+load("D:/Cursos/Pos_IA/Estatistica_aplicada_I/Aula_3/wage.RData")
+
+#wage$husearns <- exp(wage$husearns)
+#wage$hushrs <- exp(wage$hushrs)
+#wage$earns <- exp(wage$earns)
+#wage$age <- exp(wage$age)
+#wage$educ <- exp(wage$educ)
+#wage$hrwage <- exp(wage$hrwage)
+
 gc()
 ################### Estimando o modelo preliminar ############################
 
@@ -976,6 +984,8 @@ PanJenearns<-fform(wage,"earns",formBase)
 #no modelo
 
 ###Para transformar por smoothing:
+#install.packages("timetk")
+library(timetk)
 
 wage$husearnss <- smooth_vec(wage$husearns)
 wage$educs <- smooth_vec(wage$educ)
@@ -1081,8 +1091,8 @@ summary(resultados)
 bptest(hrwage~husearns+hushrs+kidge6+age+educ+union+
          kidlt6+earns,studentize=FALSE, data=wage)
 
-# H0: homocedático (variâncias constantes); 
-# HA: Heterocedastico (variâncias não constantes)
+# H0: homocedástico (variâncias constantes); 
+# HA: Heterocedástico (variâncias não constantes)
 
 # O resultado do teste é:
 
@@ -1101,12 +1111,16 @@ qchisq(0.95, df=6, lower.tail = TRUE)
 
 #Vamos reduzir a variância das variáveis por meio do log das variáveis
 
-wage$hrwage <- log(wage$hrwage)
-wage$husearns <- log(wage$husearns)
-wage$earns <- log(wage$earns)
-wage$hushrs <- log(wage$hushrs)
-wage$age <- log(wage$age)
-wage$educ <- log(wage$educ)
+wage$lhrwage <- log(wage$hrwage)
+wage$lhusearns <- log(wage$husearns)
+wage$learns <- log(wage$earns)
+wage$lhushrs <- log(wage$hushrs)
+wage$lage <- log(wage$age)
+wage$leduc <- log(wage$educ)
+
+bptest(lhrwage~lhusearns+lhushrs+kidge6+lage+leduc+union+
+         kidlt6+learns,studentize=FALSE, data=wage)
+
 
 # Agora o resultado do teste é:
 #Breusch-Pagan test
@@ -1120,8 +1134,8 @@ wage$educ <- log(wage$educ)
 
 # A regressão normal é:
 
-resultados <- lm(hrwage~husearns+hushrs+kidge6+age+educ+union+
-                   kidlt6+earns, data = wage)
+resultados <- lm(lhrwage~lhusearns+lhushrs+kidge6+lage+leduc+union+
+                   kidlt6+learns, data = wage)
 summary(resultados)
 
 #Agora a regressão robusta:
@@ -1129,8 +1143,8 @@ summary(resultados)
 # install.packages("robust")
 library(robust)
 
-resultrob <- lmRob(hrwage~husearns+hushrs+kidge6+age+educ+union+
-                     kidlt6+earns,data=wage)
+resultrob <- lmRob(lhrwage~lhusearns+lhushrs+kidge6+lage+leduc+union+
+                     kidlt6+learns,data=wage)
 summary(resultrob)
 
 AIC(resultados)
@@ -1140,6 +1154,7 @@ BIC(resultados)
 library(AICcmodavg)
 
 # AICc ? usado para pequenas amostras
+
 AICc(resultados)
 
 #install.packages("performace")
@@ -1188,8 +1203,8 @@ log(250)
 #hushrs = 0 --> parâmetro não significativo a 95%
 
 predict(object = resultrob,
-        data.frame(age=3.5, educ=2.48, earns=5.52, kidlt6 = 1,
-                   husearns=0, hushrs=0, kidge6=0, union=0))
+        data.frame(lage=3.5, leduc=2.48, learns=5.52, kidlt6 = 1,
+                   lhusearns=0, lhushrs=0, kidge6=0, union=0))
 
 #o salario por hora é:
 exp(1.831121)
