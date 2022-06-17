@@ -1,0 +1,278 @@
+---
+title: "Segunda lista de exercícios"
+author: "Ernani de Souza Cubas Neto"
+date: '12/06/2022'
+output: html_document
+---
+
+<style>
+body {
+text-align: justify}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+#### **Com a base de dados "imoveiscwbav" obter os seguintes resultados com o auxílio do "R"**
+
+***
+
+##### Carregando as bibliotecas
+
+```{r, echo=FALSE}
+load("D:/Cursos/Pos_IA/Estatistica_aplicada_I/exercicio2/imoveiscwbav.RData")
+imoveiscwbav$plaz = exp(imoveiscwbav$plaz)
+imoveiscwbav$park = exp(imoveiscwbav$park)
+imoveiscwbav$trans = exp(imoveiscwbav$trans)
+imoveiscwbav$kidca = exp(imoveiscwbav$kidca)
+imoveiscwbav$school = exp(imoveiscwbav$school)
+imoveiscwbav$health = exp(imoveiscwbav$health)
+imoveiscwbav$bike = exp(imoveiscwbav$bike)
+
+library("PanJen")
+library (carData)
+library(car)
+library (zoo)
+library (lmtest)
+library(RcmdrMisc)
+library(robust)
+library(performance)
+```
+
+***
+
+##### **a) Estimar um modelo preliminar e apresentar os resultados ("price").** 
+
+##### Estimando um modelo preliminar
+
+```{r, echo=FALSE}
+formBase = formula(price~age+parea+tarea+bath+ensuit+garag+plaz+park+trans+kidca+school+health+bike+barb+balc+elev+fitg+party+categ)
+resultados <- lm(formula=formBase,data=imoveiscwbav)
+
+summary (resultados)
+```
+
+>##### **Sobre a resposta:** Em um primeiro levantamento, verificamos que as variáveis "age", "parea", "tarea", "ensuit", "garag", "elev", "fitg" e "categ" possuem maiores graus de significância, ou seja, estatisticamente diferentes de zero. R² neste caso possui o valor de 0.8073, ou seja, as variáveis explicativas conseguem explicar 80,73% das variações da variável dependente ("price"). No caso do R² ajustado, o valor vai para 80,03% O valor da estatística F de 114.9 informa que pelo menos um dos parâmetros é diferente de 0, afirmando que existe uma reta de regressão
+
+***
+
+##### **b) Testar as variáveis para formulação do modelo.** 
+
+##### Testando as variáveis
+
+```{r, echo=FALSE}
+print("Testando a variável 'age':")
+PanJenAge<-fform(imoveiscwbav,"age",formBase)
+print("Testando a variável 'parea':")
+PanJenParea<-fform(imoveiscwbav,"parea",formBase)
+print("Testando a variável 'tarea':")
+PanJenTarea<-fform(imoveiscwbav,"tarea",formBase)
+print("Testando a variável 'plaz':")
+PanJenPlaz<-fform(imoveiscwbav,"plaz",formBase)
+print("Testando a variável 'park':")
+PanJenPark<-fform(imoveiscwbav,"park",formBase)
+print("Testando a variável 'trans':")
+PanJenTrans<-fform(imoveiscwbav,"trans",formBase)
+print("Testando a variável 'kidca':")
+PanJenKidca<-fform(imoveiscwbav,"kidca",formBase)
+print("Testando a variável 'school':")
+PanJenSchool<-fform(imoveiscwbav,"school",formBase)
+print("Testando a variável 'health':")
+PanJenHealth<-fform(imoveiscwbav,"health",formBase)
+print("Testando a variável 'bike':")
+PanJenBike<-fform(imoveiscwbav,"bike",formBase)
+
+```
+
+***
+
+##### **c) Verifique a presença de outliers.** 
+
+```{r, echo=FALSE}
+outlierTest(resultados)
+```
+
+>##### **Sobre a resposta:** Foram detectadas as linhas 13 e 393 como outliers
+
+***
+
+##### **d) Teste a especificação do modelo e altere se necessário.** 
+
+```{r, echo=FALSE}
+resettest(formBase,power=2:3, type="regressor", data=imoveiscwbav)
+```
+
+```{r, echo=FALSE}
+print("F tabelado:")
+qf(0.95, df1=38, df2=483)
+
+```
+
+>##### **Sobre a resposta:** O F Calculado é de 4.477, ou seja, maior que o F Tabelado. Nesse caso, ajustamos as variáveis de acordo com os testes em b)
+
+##### Ajustando as variáveis
+```{r, echo=FALSE}
+print('sqrt(age)')
+imoveiscwbav$age = sqrt(imoveiscwbav$age)
+print('sqrt(parea)')
+imoveiscwbav$parea = sqrt(imoveiscwbav$parea)
+print('sqrt(tarea)')
+imoveiscwbav$tarea = sqrt(imoveiscwbav$tarea)
+print('1/park')
+imoveiscwbav$park = 1/imoveiscwbav$park
+print('1/trans')
+imoveiscwbav$trans = 1/imoveiscwbav$trans
+print('sqrt(kidca)')
+imoveiscwbav$kidca = sqrt(imoveiscwbav$kidca)
+
+resettest(formBase,power=2:3, type="regressor", data=imoveiscwbav)
+
+```
+>##### **Sobre a resposta:** Mesmo realizando as transformações nas variáveis, conforme apresentado nos testes em b), o F calculado caiu para apenas 4.2773, continuando maior que o F tabelado. Tentaremos baixar este valor realizando os testes de multicolinearidade e exclusão de possíveis variáveis.
+
+
+***
+
+##### **e) Teste a presença de multicolinearidade e exclua variáveis se necessário.** 
+
+```{r, echo=FALSE}
+print("Verificando pela matriz de correlação")
+cor(imoveiscwbav[,c("age","parea","tarea","bath","ensuit","garag","plaz","park","trans","kidca","school","health","bike")], 
+    use="complete")
+
+print("Excluindo 'tarea','bath','ensuit' e 'garag'")
+formBase = formula(price~age+parea+plaz+park+trans+kidca+school+health+bike+barb+balc+elev+fitg+party+categ)
+
+print("Verificando multicolinearidade pelo VIF - Valor de Inflação da Variância")
+vif(lm(formBase,data=imoveiscwbav), type="high-order")
+
+print("Refazendo o RESETTest")
+resettest(formBase,power=2:3, type="regressor", data=imoveiscwbav)
+```
+
+>##### **Sobre a resposta:** Pela Matriz de Correlação, percebe-se correlações entre as variaveis 'parea'com 'tarea','bath','ensuit' e 'garag'. Optou-se por retirar estas 4 últimas. Pelo teste VIF, já com as variáveis excluidas, não foram encontradas correlações. Refazendo o RESET test, o valor caiu para 2.9723
+
+***
+
+##### **f) Selecione um modelo pela técnica de stepwise **
+```{r, echo=FALSE}
+resultados <- lm(formula=formBase,data=imoveiscwbav)
+
+summary (resultados)
+
+step <- stepwise(resultados, direction= 'backward/forward', criterion ='AIC')
+step
+
+```
+
+>##### **Sobre a resposta:** Segundo a técnica de stepwise, o modelo com o menor AIC,e portanto o melhor modelo considerado, é o price ~ age + parea + plaz + park + school + balc + elev + fitg + party + categ. 
+
+##### Retestando o novo modelo
+```{r, echo=FALSE}
+formBase = formula(price~age+parea+plaz+park+school+balc+elev+fitg+party+categ)
+resultados <- lm(formula=formBase,data=imoveiscwbav)
+
+summary (resultados)
+
+resettest(formBase,power=2:3, type="regressor", data=imoveiscwbav)
+
+```
+>##### **Sobre a resposta:** Após as alterações no modelo definidas pelo stepwise, o F caiu para 2.8348
+
+*** 
+
+##### **g) Faça o teste de homocedasticidade e faça correção da heterocedasticidade se necessário **
+```{r, echo=FALSE}
+bptest(formBase,studentize=FALSE, data=imoveiscwbav)
+
+print("O valor chiquadrado tabelado é:")
+
+qchisq(0.95, df=10, lower.tail = TRUE)
+
+```
+>##### **Sobre a resposta:** o resultado do teste BP foi de 197.73. Por ser maior que o valor chiquadrado tabelado, rejeita-se a hipótese de homocedasticidade
+
+##### Reduzindo a variância das variáveis por meio do log das variáveis:
+```{r, echo=FALSE}
+
+imoveiscwbav$lprice <- log(imoveiscwbav$price)
+imoveiscwbav$lage <- log(imoveiscwbav$age)
+imoveiscwbav$lparea <- log(imoveiscwbav$parea)
+imoveiscwbav$lplaz <- log(imoveiscwbav$plaz)
+imoveiscwbav$lpark <- log(imoveiscwbav$park)
+imoveiscwbav$lschool <- log(imoveiscwbav$school)
+
+formBaseL = formula(lprice~lage+lparea+lplaz+lpark+lschool+balc+elev+fitg+party+categ)
+
+bptest(formBaseL,studentize=FALSE, data=imoveiscwbav)
+```
+>##### **Sobre a resposta:** Reduzindo a variância das variáveis, o valor em BP caiu. Porém, continua maior que o valor chiquadrado tabelado.
+
+##### Regressão normal (com a redução das variância das variáveis)
+```{r, echo=FALSE}
+resultados <- lm(formula=formBaseL,data=imoveiscwbav)
+
+summary (resultados)
+```
+
+##### Regressão robusta
+```{r, echo=FALSE}
+resultrob <- lmRob(formBaseL,data=imoveiscwbav)
+summary(resultrob)
+
+```
+
+***
+
+##### **h) Obtenha os indicadores de desempenho do modelo**
+```{r, echo=FALSE}
+model_performance(resultados)
+model_performance(resultrob)
+```
+>##### **Sobre a resposta:** Para o modelo de regressão normal, tem-se os valores de RMSE e Sigma ligeiramente menores, se comparado os mesmos indicadores para o modelo robusto. No caso do R², o valor é 0,002 maior.
+***
+
+##### **i) Estime os intervalos de confiança para os parâmetros do modelo**
+
+##### Intevalos de confiança - Regressão Normal
+```{r, echo=FALSE}
+confint(resultados, level = 0.95)
+
+```
+##### Intevalos de confiança - Regressão Robusta
+```{r, echo=FALSE}
+confint(resultrob, level=0.95)
+```
+
+***
+
+##### **j) Faça predição de um imóvel hipotético: apresente seus parâmetros de simulação e o resultado **
+
+##### Para o teste, foram selecionados os valores das medianas das variáveis da base (para a predição é necessário substituir o valor pelo seu log, conforme conversão realizada anteriormente):
+
++ age = 3 -> log(3) = 1.0986
++ parea = 10.954 -> log(10.954) = 2.394
++ plaz = 0.20671 -> log(0.20671) = -1.5764
++ park = 3.5507 - > log(3.5507) = 1.2672
++ school = 1.764 -> log(1.764) = 0.5675
++ balc = 0
++ elev = 0
++ fitg = 0
++ party = 1
++ categ = 1
+
+##### A mediana de 'price' é 880000, ou log(880000) = 13.69
+
+
+```{r, echo=TRUE}
+val <- predict(object = resultrob,
+         data.frame(lage=1.0986, lparea=2.394,lplaz=-1.5764,lpark=1.2672,lschool=0.5675,balc=0,elev=0,fitg=0,party=1,categ=1))
+val
+```
+
+##### Convertendo o valor
+```{r, echo=TRUE}
+exp(13.67026)
+```
+
