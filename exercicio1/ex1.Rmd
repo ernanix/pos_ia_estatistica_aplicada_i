@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = FALSE)
 
 #### Carregando as bibliotecas
 ```{r, echo=FALSE}
-load("D:/Cursos/Pos_IA/Estatistica_aplicada_I/exercicio1/realestateiaa.RData")
+load("/Users/MPPR/Documents/GitHub/pos_ia_estatistica_aplicada_i/exercicio1/realestateiaa.RData")
 library (RcmdrMisc)
 library (fdth)
 library(BSDA)
